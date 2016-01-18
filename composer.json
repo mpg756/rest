@@ -1,0 +1,9 @@
+{
+  "autoload": {
+    "classmap": [
+      "Models/Database/",
+      "Models/Handler/",
+      "Сontrollers/"
+    ]
+  }
+}
