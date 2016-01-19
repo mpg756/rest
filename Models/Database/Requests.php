@@ -10,12 +10,12 @@ class Requests
     private $_db;
 
     public $fields = array(
-        'label' => 'string',
-        'street' => 'string',
-        'housenumber' => 'int',
-        'postalcode' => 'int',
-        'city' => 'string',
-        'country' => 'string'
+        'LABEL' => 'string',
+        'STREET' => 'string',
+        'HOUSENUMBER' => 'int',
+        'POSTALCODE' => 'int',
+        'CITY' => 'string',
+        'COUNTRY' => 'string'
     );
 
     public function __construct()
@@ -65,14 +65,14 @@ class Requests
         $values[] = $id;
 
         try{
-            $count = count($values);
+            $count = (count($values) - 1)/2 +1; //count pairs of key=>value + id
             if($count>1){
                 $sql = 'UPDATE ADDRESS SET ';
-                while($count>0){
-                    $sql.= ($count == 1) ? '? = ?' : '? = ?, ';
+                while($count>1){
                     $count--;
+                    $sql.= ($count == 1) ? '? = ?' : '? = ?, ';
                 }
-                $sql.= 'WHERE ADDRESSID = ?';
+                $sql.= ' WHERE ADDRESSID = ?';
                 $this->_db->query($sql,$values);
             } else {
                 $sql = 'UPDATE ADDRESS
@@ -81,7 +81,7 @@ class Requests
                 $this->_db->query($sql,$values);
             }
             return true;
-        } catch(\PDOException $e) {
+        } catch(\Exception $e) {
             new ApiError($e);
         }
         return false;

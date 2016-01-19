@@ -36,11 +36,15 @@ class Connection
         return self::$_instance;
     }
 
-    public function query($sql, array $param = []){
+    public function query($sql, array $params = []){
         try {
             $stmt = $this->_db->prepare($sql);
-            $stmt->execute($param);
-            return $stmt->fetchAll(\PDO::FETCH_OBJ);
+            $result = $stmt->execute($params);
+            if(!$result) {
+                throw new \PDOException('parameter has not been executed');
+            }
+            $all = $stmt->fetchAll(\PDO::FETCH_OBJ);
+            return $all;
         } catch (\PDOException $e) {
             new ApiError($e);
         }
