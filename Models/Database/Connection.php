@@ -40,12 +40,10 @@ class Connection
         try {
             $stmt = $this->_db->prepare($sql);
             $result = $stmt->execute($params);
-            $err = $stmt->errorInfo();
             if(!$result) {
                 throw new \PDOException('parameter has not been executed ' . $stmt->errorInfo()[2]);
             }
-            $all = $stmt->fetchAll(\PDO::FETCH_OBJ);
-            return $all;
+            return $stmt->fetchAll(\PDO::FETCH_OBJ);
         } catch (\PDOException $e) {
             new ApiError($e);
         }

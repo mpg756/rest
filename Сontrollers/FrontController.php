@@ -31,27 +31,13 @@ class FrontController
             }
             $response['success'] = true;
             return new Json($response);
-        } elseif ((int)$this->_requestParts[1]) {
+        }
+        elseif ($this->_requestMethod == 'POST' && empty($this->_requestParts[1])){
+            $this->_validateInput();
+        }
+        elseif ((int)$this->_requestParts[1]) {
             if ($this->_requestMethod == 'PUT') {
-                $inputJSON = file_get_contents('php://input');
-                $input = json_decode($inputJSON, TRUE);
-                if (!empty($input)) {
-                    $dbRequests = new Requests();
-                    $inputRows = array_change_key_case($input, CASE_UPPER ); // get only keys, convert them to upper case
-                    $avalRows = $dbRequests->fields;
-                    $values = array_intersect_key($inputRows,$avalRows); // check if input array contain valid fields
-                    if(!empty($values)){
-                        if(!$this->_checkInputType($values)) {
-                            return $this->_returnFault('wrong parameter given');
-                        }
-                        $dbRequests->setSingleRow($this->_requestParts[1],$values);
-                    }
-                    else {
-                        return $this->_returnFault('wrong params given');
-                    }
-                } else {
-                    return $this->_returnFault('no parameters are given. nothing to update');
-                }
+                $this->_validateInput();
             } elseif ($this->_requestMethod == 'GET') {
                 $id = abs((int)$this->_requestParts[1]);
                 $response = (new Requests())->getSingleRow($id);
@@ -85,6 +71,51 @@ class FrontController
             }
         }
         return true;
+    }
+
+    /**
+     * Validations for input data
+     * Works for create(POST) and edit(PUT)
+    */
+    private function _validateInput()
+    {
+        $inputJSON = file_get_contents('php://input');
+        $input = json_decode($inputJSON, TRUE);
+        if (!empty($input)) {
+            $dbRequests = new Requests();
+            $inputRows = array_change_key_case($input, CASE_UPPER ); // get only keys, convert them to upper case
+            $avalRows = $dbRequests->fields;
+            $values = array_intersect_key($inputRows,$avalRows); // check if input array contain valid fields
+            if(!empty($values)){
+                if(!$this->_checkInputType($values)) {
+                    return $this->_returnFault('wrong parameter given');
+                }
+                if($this->_requestMethod == 'POST'){
+                    if($dbRequests->addRow($values))
+                    {
+                        $response['success'] = true;
+                        return new Json($response);
+                    }
+                }
+                else {
+                    if($dbRequests->setSingleRow($this->_requestParts[1],$values))
+                    {
+                        $response['success'] = true;
+                        return new Json($response);
+                    }
+                }
+            }
+            else {
+                return $this->_returnFault('wrong params given');
+            }
+        } else {
+            if($this->_requestMethod == 'POST'){
+                return $this->_returnFault('no parameters are given. nothing to create');
+            }
+            else {
+                return $this->_returnFault('no parameters are given. nothing to update');
+            }
+        }
     }
 
 }
