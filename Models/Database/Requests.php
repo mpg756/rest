@@ -58,30 +58,24 @@ class Requests
     {
         /*formatting array*/
         $values = [];
+        $keys = [];
         foreach($data as $key => $item){
-            $values[] = $key;
+            $keys[] = $key;
             $values[] = $item;
         }
         $values[] = $id;
 
-        try{
-            $count = (count($values) - 1)/2 +1; //count pairs of key=>value + id
-            if($count>1){
-                $sql = 'UPDATE ADDRESS SET ';
-                while($count>1){
-                    $count--;
-                    $sql.= ($count == 1) ? '? = ?' : '? = ?, ';
-                }
-                $sql.= ' WHERE ADDRESSID = ?';
-                $this->_db->query($sql,$values);
-            } else {
-                $sql = 'UPDATE ADDRESS
-                SET ? = ?
-                WHERE ADDRESSID = ?';
-                $this->_db->query($sql,$values);
+        try { // building string for pdo prepare statement
+            $count = count($keys);
+            $sql = 'UPDATE ADDRESS SET ';
+            for ($_i = 0; $_i < $count; $_i++) {
+                $sql .= ($_i == ($count - 1)) ? $keys[$_i] . ' = ?' : $keys[$_i] . ' = ?, '; //
             }
+            $sql .= ' WHERE ADDRESSID = ?';
+            $this->_db->query($sql, $values);
+
             return true;
-        } catch(\Exception $e) {
+        } catch (\Exception $e) {
             new ApiError($e);
         }
         return false;
