@@ -2,7 +2,9 @@
 
 how to use:
 
-/addresses/                 GET| Returns a list of all available addresses or accepts a new address to be stored.
+/addresses/                 GET| Returns a list of all available addresses.
+
+/addresses/                 POST| Accepts a new address to be stored.
 
 /addresses/{addressId}/     GET| Returns an existing address.
 
